@@ -1,0 +1,29 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- Template: the server's render step (backend/app/render.py) fills in the settings. -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- the app's path (BASE_PATH): all relative URLs, the router, API and relay start here -->
+    <base href="/" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <!-- No viewport-fit=cover: with it, installed iOS apps get a window short by the status bar
+         and an unpaintable strip at the bottom (WebKit bug 301108, open, iOS 26/27:
+         https://bugs.webkit.org/show_bug.cgi?id=301108). Without it iOS keeps the app inside
+         the safe areas itself, so no env(safe-area-inset-*) code is needed. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111827" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="description" content="Cashless tab system for clubs and events" />
+    <title>Bardesk</title>
+    <!-- settings of this installation (self.BARDESK_CONFIG), before the app starts -->
+    <script vite-ignore src="config.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# CI for Bardesk, runs once the repo is pushed to GitHub.
+# Runs scripts/test.sh exactly as locally: backend pytest, frontend vitest,
+# headless e2e (real uvicorn + real WebSocket clients), Playwright UI tests and the
+# type-checked build. The release workflow runs it before it builds the image.
+name: CI
+
+on:
+  push:
+    branches: ["**"] # tags: release.yml runs this workflow
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12" # matches the Dockerfile
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install backend
+        run: |
+          python -m venv backend/venv
+          backend/venv/bin/pip install -r backend/requirements.txt -r backend/requirements-dev.txt
+      - name: Install frontend
+        run: npm ci && npx playwright install --with-deps --only-shell chromium
+        working-directory: frontend
+      - name: Test
+        run: ./scripts/test.sh -v

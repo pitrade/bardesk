@@ -1,0 +1,52 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Self-hosted Bardesk: put this file and .env (from .env.example) into one folder, then
+#   docker compose up -d                          # start; also after changing .env
+#   docker compose pull && docker compose up -d   # update (after changing BARDESK_VERSION in .env)
+# With COMPOSE_PROFILES=caddy (default in .env.example) the bundled Caddy gets the HTTPS
+# certificate automatically (DNS must point here, ports 80/443 open). With your own reverse
+# proxy, leave COMPOSE_PROFILES empty and forward to 127.0.0.1:BARDESK_PORT.
+# Own icon: branding/icon.png next to this file. Build from source: compose.override.example.yaml
+services:
+  app:
+    image: ghcr.io/pitrade/bardesk:${BARDESK_VERSION:-1.0}
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:${BARDESK_PORT:-8000}:8000" # this machine only, for your own reverse proxy
+    volumes:
+      - data:/data
+      - ./branding:/app/branding:ro
+
+  caddy:
+    profiles: [caddy]
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    configs:
+      - source: caddyfile
+        target: /etc/caddy/Caddyfile
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+configs:
+  # HTTPS in front of the app, also for the relay WebSocket. BASE_PATH (e.g. "/" or "/tab/")
+  # is stripped before the request reaches the app.
+  caddyfile:
+    content: |
+      ${DOMAIN:?set DOMAIN in .env} {
+        encode zstd gzip
+        handle_path ${BASE_PATH:-/}* {
+          reverse_proxy app:8000
+        }
+      }
+
+volumes:
+  data:
+  caddy_data:
+  caddy_config:

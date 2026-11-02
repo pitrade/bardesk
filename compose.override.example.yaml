@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Build the image from this source tree instead of pulling it (development, own changes):
+#   cp compose.override.example.yaml compose.override.yaml
+#   docker compose up -d --build
+services:
+  app:
+    build: .
+    image: bardesk:local
+    pull_policy: build

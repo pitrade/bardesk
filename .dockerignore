@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+**/node_modules
+**/__pycache__
+frontend/dist
+frontend/test-results
+frontend/playwright-report
+backend/venv
+backend/.env*
+backend/*.db
+.git
+.env
